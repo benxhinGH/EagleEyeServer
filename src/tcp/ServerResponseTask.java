@@ -192,6 +192,7 @@ public class ServerResponseTask implements Runnable {
                 } else if (outputStream != null) {
                     synchronized (outputStream) {
                         SocketUtil.write2Stream(procotol, outputStream);
+                        System.out.println("send data:"+procotol.toString());
                     }
                 }
             }

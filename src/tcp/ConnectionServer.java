@@ -3,6 +3,8 @@ package tcp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import tcp.callback.ResponseCallback;
@@ -16,6 +18,7 @@ public class ConnectionServer {
 
     private static boolean isStart = true;
     private static ServerResponseTask serverResponseTask;
+    private static List<ServerResponseTask> spys=new ArrayList<>();
 
     public ConnectionServer() {
     	
@@ -37,18 +40,21 @@ public class ConnectionServer {
                                 if (reciveMsg != null) {
                                     System.out.println(reciveMsg.getData());
                                 }
+                                spys.remove(serverResponseTask);
                             }
 
                             @Override
                             public void targetIsOnline(String clientIp) {
                                 System.out.println(clientIp + " is onLine");
                                 System.out.println("-----------------------------------------");
+                                
                             }
 
 							
                         });
 
                 if (socket.isConnected()) {
+                	spys.add(serverResponseTask);
                     executorService.execute(serverResponseTask);
                 }
             }
@@ -69,5 +75,9 @@ public class ConnectionServer {
                 }
             }
         }
+    }
+    
+    public List<ServerResponseTask> getSpys(){
+    	return spys;
     }
 }

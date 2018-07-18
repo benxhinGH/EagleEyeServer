@@ -20,7 +20,7 @@ public class FileRecServer {
 		try {
 			ServerSocket socket=new ServerSocket(Config.FILE_PORT);
 			while(true) {
-				System.out.println("start listening");
+				System.out.println("file server start listening");
 				Socket s=socket.accept();
 				String fileName=System.currentTimeMillis()+Config.PIC_SUFFIX;
 				File file=new File(Config.FILE_SAVE_PATH+fileName);
