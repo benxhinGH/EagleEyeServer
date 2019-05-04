@@ -3,20 +3,20 @@ package entity;
 import utils.Log;
 import utils.LogLevel;
 
-public class TaskIdPool {
+public class TransactionIdPool {
 
-    final String TAG = TaskIdPool.class.getSimpleName();
+    final String TAG = TransactionIdPool.class.getSimpleName();
     int capability = 10;
     int[] id;
-    private static TaskIdPool instance;
+    private static TransactionIdPool instance;
 
-    private TaskIdPool(){
+    private TransactionIdPool(){
         id = new int[capability];
     }
 
-    public static TaskIdPool getInstance(){
+    public static TransactionIdPool getInstance(){
         if(instance == null){
-            instance = new TaskIdPool();
+            instance = new TransactionIdPool();
         }
         return instance;
     }

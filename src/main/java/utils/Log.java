@@ -14,4 +14,8 @@ public class Log {
 		log(tag, LogLevel.ERROR, content);
 	}
 
+	public static void w(String tag, String content){
+		log(tag, LogLevel.WARNING, content);
+	}
+
 }

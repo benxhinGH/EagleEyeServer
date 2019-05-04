@@ -1,18 +1,14 @@
 package network;
 
-import com.alibaba.fastjson.JSONArray;
-import entity.Spy;
-import entity.SpyManager;
-import entity.TaskIdPool;
+import entity.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import protocol.*;
-import utils.Config;
 import utils.Log;
 import utils.LogLevel;
 import utils.Util;
 
-import java.net.InetSocketAddress;
+import java.io.File;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -30,20 +26,76 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         BasicProtocol basicProtocol = (BasicProtocol)msg;
+        int transactionId = basicProtocol.getTransactionId();
         Log.log(TAG, LogLevel.INFO, "receive msg:" + basicProtocol.toString());
         switch (basicProtocol.getMsgId()){
             case MsgId.IDENTIFICATION_REQUEST:
-                String hostname = new String(basicProtocol.getDataArray(), 0, basicProtocol.getDataArray().length);
+                IdentificationRequest identificationRequest = Parser.parseIdentificationRequest(basicProtocol);
                 String ip = Util.getChannelRemoteAddressIp(ctx).getHostAddress();
                 int port = Util.getChannelRemoteAddressPort(ctx);
-                Spy spy = new Spy(hostname, ip, port);
-                SpyManager.getInstance().add(spy, ctx);
+                Terminal terminal = null;
+                if(identificationRequest.getTerminalType() == Terminal.TYPE_SPY){
+                    terminal = new Spy(ip, port, identificationRequest.getHostname());
+                }else if(identificationRequest.getTerminalType() == Terminal.TYPE_CLIENT){
+                    terminal = new Client(ip, port, identificationRequest.getHostname());
+                }
+                if(terminal == null){
+                    Log.w(TAG, "terminal is null");
+                }
+                TerminalManager.getInstance().add(terminal, ctx);
                 BasicProtocol identificationResponse = ProtocolFactory.createIdentificationResponse(ErrorCode.SUCCESS);
                 ctx.writeAndFlush(identificationResponse);
                 break;
-                case MsgId.SPY_LIST_REQUEST:
+            case MsgId.SPY_LIST_REQUEST:
+                BasicProtocol spyListResponse = ProtocolFactory.createSpyListResponse();
+                ctx.writeAndFlush(spyListResponse);
+                break;
+            case MsgId.FILE_SEND_REQUEST:
+                FileSendRequest fileSendRequest = Parser.parseFileSendRequest(basicProtocol.getDataArray());
+                FileReceiver fileReceiver = new FileReceiver(fileSendRequest.getFileName(), fileSendRequest.getFileLength(), new FileReceiverCallback() {
+                    @Override
+                    public void ready(int port) {
+                        BasicProtocol fileSendResponse = ProtocolFactory.createFileSendResponse(ErrorCode.SUCCESS, port);
+                        ctx.writeAndFlush(fileSendResponse);
+                    }
 
-                    break;
+                    @Override
+                    public void currentProgress(int progress) {
+
+                    }
+
+                    @Override
+                    public void finish(File file) {
+                        Client client = TerminalManager.getInstance().getWaitRspClient(transactionId);
+                        ChannelHandlerContext channelHandlerContext = TerminalManager.getInstance().getCtx(client);
+                        BasicProtocol fileSendRequest1 = ProtocolFactory.createFileSendRequest(transactionId, file);
+                        channelHandlerContext.writeAndFlush(fileSendRequest1);
+                    }
+                });
+                executor.execute(fileReceiver);
+                break;
+            case MsgId.SCREENSHOT_REQUEST:
+                Spy trgSpy = Parser.parseScreenShotRequest(basicProtocol);
+                ChannelHandlerContext channelHandlerContext = TerminalManager.getInstance().getCtx(trgSpy);
+                BasicProtocol screenShotRequest = ProtocolFactory.createScreenShotRequest(transactionId);
+                channelHandlerContext.writeAndFlush(screenShotRequest);
+                break;
+            case MsgId.FILE_SEND_RESPONSE:
+                int port1 = Util.byteArrayToInt(basicProtocol.getDataArray());
+                File file = ImageCacheManager.getInstance().get(transactionId);
+                FileSender fileSender = new FileSender(Util.getChannelRemoteAddressIp(ctx), port1, file, new FileSenderCallback() {
+                    @Override
+                    public void currentProgress(int progress) {
+
+                    }
+
+                    @Override
+                    public void finish() {
+
+                    }
+                });
+                executor.execute(fileSender);
+                break;
                 default:
                     Log.log(TAG, LogLevel.INFO, "unknow msg");
                     break;

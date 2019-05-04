@@ -33,6 +33,10 @@ public class ImageCacheManager {
         return instance;
     }
 
+    public void put(int transactionId, File file){
+        fileMap.put(transactionId, file);
+    }
+
     public File newImageFile(int transactionId){
         String fileName = cacheDirPath + String.valueOf(System.currentTimeMillis()) + "." + Config.DEFAULT_IMAGE_FORMAT;
         File file = new File(fileName);
@@ -40,7 +44,7 @@ public class ImageCacheManager {
         return file;
     }
 
-    public File getCache(int transactionId){
+    public File get(int transactionId){
         return fileMap.get(transactionId);
     }
 
