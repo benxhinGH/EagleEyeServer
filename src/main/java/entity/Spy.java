@@ -8,7 +8,7 @@ public class Spy extends Terminal{
     }
 
     @Override
-    public void setType() {
-        type = Terminal.TYPE_SPY;
+    public int getType() {
+        return Terminal.TYPE_SPY;
     }
 }

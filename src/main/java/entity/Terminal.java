@@ -8,7 +8,6 @@ public abstract class Terminal {
     private String ip;
     private int port;
     private String hostname;
-    protected int type;
 
     public Terminal(){
 
@@ -20,11 +19,7 @@ public abstract class Terminal {
         this.hostname = hostname;
     }
 
-    public abstract void setType();
-
-    public int getType(){
-        return type;
-    }
+    public abstract int getType();
 
     public String getIp() {
         return ip;
@@ -58,8 +53,7 @@ public abstract class Terminal {
         Terminal terminal = (Terminal) obj;
         if(terminal.getHostname().equals(hostname) &&
                 terminal.getIp().equals(ip) &&
-                terminal.getPort() == port &&
-                terminal.getType() == type){
+                terminal.getPort() == port){
             return true;
         }
         return false;
@@ -71,7 +65,6 @@ public abstract class Terminal {
         result = result * 31 + ip.hashCode();
         result = result * 31 + port;
         result = result * 31 + hostname.hashCode();
-        result = result * 31 + type;
         return result;
     }
 
@@ -81,7 +74,6 @@ public abstract class Terminal {
                 "ip='" + ip + '\'' +
                 ", port=" + port +
                 ", hostname='" + hostname + '\'' +
-                ", type=" + type +
                 '}';
     }
 }

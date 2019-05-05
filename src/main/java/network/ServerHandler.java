@@ -79,6 +79,11 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                 ChannelHandlerContext channelHandlerContext = TerminalManager.getInstance().getCtx(trgSpy);
                 BasicProtocol screenShotRequest = ProtocolFactory.createScreenShotRequest(transactionId);
                 channelHandlerContext.writeAndFlush(screenShotRequest);
+
+                String clientIp = Util.getChannelRemoteAddressIp(ctx).getHostAddress();
+                int clientPort = Util.getChannelRemoteAddressPort(ctx);
+                Client client = TerminalManager.getInstance().getClient(clientIp, clientPort);
+                TerminalManager.getInstance().putWaitRspClient(transactionId, client);
                 break;
             case MsgId.FILE_SEND_RESPONSE:
                 int port1 = Util.byteArrayToInt(basicProtocol.getDataArray());
@@ -95,6 +100,11 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                     }
                 });
                 executor.execute(fileSender);
+                break;
+            case MsgId.SCREENSHOT_RESPONSE:
+                BasicProtocol screenShotResponse = ProtocolFactory.createScreenShotResponse(transactionId);
+                ChannelHandlerContext clientCtx = TerminalManager.getInstance().getCtx(TerminalManager.getInstance().getWaitRspClient(transactionId));
+                clientCtx.writeAndFlush(screenShotResponse);
                 break;
                 default:
                     Log.log(TAG, LogLevel.INFO, "unknow msg");

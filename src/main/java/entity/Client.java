@@ -7,7 +7,7 @@ public class Client extends Terminal{
     }
 
     @Override
-    public void setType() {
-        type = Terminal.TYPE_CLIENT;
+    public int getType() {
+        return Terminal.TYPE_CLIENT;
     }
 }

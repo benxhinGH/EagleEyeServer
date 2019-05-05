@@ -50,4 +50,11 @@ public class ProtocolFactory {
         return basicProtocol;
     }
 
+    public static BasicProtocol createScreenShotResponse(int transactionId){
+        BasicProtocol basicProtocol = new BasicProtocol();
+        basicProtocol.setMsgId(MsgId.SCREENSHOT_RESPONSE);
+        basicProtocol.setTransactionId((byte)transactionId);
+        return basicProtocol;
+    }
+
 }

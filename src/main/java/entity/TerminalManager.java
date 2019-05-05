@@ -61,4 +61,14 @@ public class TerminalManager {
     public void removeWaitRspClient(int transactionId){
         mapWaitRspClient.remove(transactionId);
     }
+
+    public Client getClient(String ip, int port){
+        Set<Terminal> set = map.keySet();
+        for(Terminal t:set){
+            if(t.getIp().equals(ip) && t.getPort() == port){
+                return (Client)t;
+            }
+        }
+        return null;
+    }
 }
