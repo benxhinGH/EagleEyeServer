@@ -66,6 +66,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
                     @Override
                     public void finish(File file) {
+                        ImageCacheManager.getInstance().put(transactionId, file);
                         Client client = TerminalManager.getInstance().getWaitRspClient(transactionId);
                         ChannelHandlerContext channelHandlerContext = TerminalManager.getInstance().getCtx(client);
                         BasicProtocol fileSendRequest1 = ProtocolFactory.createFileSendRequest(transactionId, file);
@@ -88,6 +89,9 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             case MsgId.FILE_SEND_RESPONSE:
                 int port1 = Util.byteArrayToInt(basicProtocol.getDataArray());
                 File file = ImageCacheManager.getInstance().get(transactionId);
+                if(file == null){
+                    Log.e(TAG, "file should not be null!");
+                }
                 FileSender fileSender = new FileSender(Util.getChannelRemoteAddressIp(ctx), port1, file, new FileSenderCallback() {
                     @Override
                     public void currentProgress(int progress) {
