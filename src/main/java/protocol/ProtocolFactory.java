@@ -19,8 +19,9 @@ public class ProtocolFactory {
         return basicProtocol;
     }
 
-    public static BasicProtocol createFileSendResponse(byte errorCode, int port){
+    public static BasicProtocol createFileSendResponse(byte errorCode, int port, int transactionId){
         BasicProtocol res = new BasicProtocol();
+        res.setTransactionId((byte)transactionId);
         res.setMsgId(MsgId.FILE_SEND_RESPONSE);
         res.setErrorCode(errorCode);
         res.setDataArray(Util.int2ByteArrays(port));

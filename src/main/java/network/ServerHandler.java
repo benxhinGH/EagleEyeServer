@@ -55,7 +55,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                 FileReceiver fileReceiver = new FileReceiver(fileSendRequest.getFileName(), fileSendRequest.getFileLength(), new FileReceiverCallback() {
                     @Override
                     public void ready(int port) {
-                        BasicProtocol fileSendResponse = ProtocolFactory.createFileSendResponse(ErrorCode.SUCCESS, port);
+                        BasicProtocol fileSendResponse = ProtocolFactory.createFileSendResponse(ErrorCode.SUCCESS, port, transactionId);
                         ctx.writeAndFlush(fileSendResponse);
                     }
 
